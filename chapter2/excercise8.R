@@ -1,61 +1,41 @@
-###################################
-#                                 #    
-#                                 #        
-#    Box - Jenkins methodology    #
-#                                 #
-# data from: sim_2 da Enders      #
-#                                 #    
-#                                 #
-###################################  
+#####################################
+#            Excercise 8            #
+#                                   #        
+#    (Box - Jenkins methodology)    # 
+#                                   #    
+#####################################  
 
-# Si importano i dati dal file sim_2.sas7bdat 
-# che è un formato per sas. Poi si visualizza
-
+# Load libraries
 library(haven)
-Dati.enders <- read_sas("/home/giovanni/Scaricati/SASDatasets/sim_2.sas7bdat")
-View(Dati.enders)
 
-# Nell'esercizio 8 pag 114 di Enders ci serve solo la prima serie,
-# quindi si eliminano i dati in più (potremmo anche evitare, ma per esercizio)
-# e si controlla se è giusto
+# Import the dataset and visualize it
+Dataset <- read_sas("/your_path/sim_2.sas7bdat")
+View(Dataset)
 
-Dati.enders[3:4] <- list(NULL) 
-View(Dati.enders)
+# Take only the data you need
+Dataset[3:4] <- list(NULL) 
 
-# Si plotta la sequenza Y1 contro il tempo
-# e sembra stazionaria in senso debole because 
-#it fluctuates around a constant mean and the variability appears to
-#be regular.
+# Plot the sequence Y1 against time. It seems  weakly stationary. In fact it fluctuates around a constant mean and the 
+# variability appears to be regular.
+Y1 <- Dataset[, 2]
+time <- Dataset[, 1]
+plot(time,Y1, type = "l")
 
-x <- Dati.enders[, 2]
-time <- Dati.enders[, 1]
-plot(time,x, type = "l")
+# Try to spot the stationarity of Y1 by looking at the ACF and PACF. Both go to 0 very quickly. This tells us that the series
+# can be stationary. (The blue lines give the values beyond which the autocorrelations are statistically significantly different
+# from zero. These two lines gives the values of the confidence interval of Box-Jenkins statistics). 
+# From the sample ACF and PACF you can also guess that the DGP is an AR(1). That's because in the ACF the autocorrelations go to
+# 0 slowly and the first autocorreltions are significantly different from 0.
+# In the PACF only the first partial autocorrelation is signifacntly different from 0. 
+acf(x = Y1, lag.max = 30)
+pacf(x = Y1, lag.max = 30)
 
-
-# Si controlla la stazionarietà dall ACF
-#e dalla PACF
-#Entrambe vanno a zero veloce, cosa che suggerisce
-#la stazionarietà della serie.
-# (The blue lines give the values beyond which the autocorrelations
-#are (statistically) significantly different from zero. 
-#Your ACF seems to indicate seasonality. Credo che le 
-# linee blu trattegiate siano i valori dell'intervalllo
-#  di confidenza della statistica test di Box and Jenkins
-# Dalla sample ACF e PACF si può anche ipotizzare
-# che il DGP sia un AR(1), dato che nella ACF
-# la correlazione tra i lag va a zero e le prime 
-# autocorrelazioni sono significativamente diverse da 0.
-# Nella pacf c'è solo la prima
-# autocorrelazione parziale significativa
-
-acf(x = x, lag.max = 30)
-pacf(x = x, lag.max = 30)
-
-# Vediamo se un modello AR(1) fitta bene i dati.
-# Si stima quindi un AR(1): y_t = a_1*y_t-1 + e_t
-# e uno con intercetta Lo s.e. dell'intercetta è
-# alto e anche l'AIC di quello senza intercetta
-# è più basso, quindi si "sceglie" quello senza.
+# Now we look if an AR(1) model fit the data well or not. We estimate an AR(1) without intercept: 
+#                                              y_(t) = a_(1) * y_(t-1) * e_(t)
+# and one AR(1) with intercept:
+#                                              y_(t) = a_(0) * y_(t-1) * e_(t).
+# The s.e. of the intercept is big. Moreover, the AIC of the AR(1) without intercept is lower than the AIC of the AR(1) with
+# the intercept, then we "choose" the AR(1) without intercept.
 
 library(forecast)
 ARwoi <- Arima(x, c(1,0,0), include.mean = FALSE) #senza intercetta
