@@ -34,71 +34,47 @@ arOne # AIC=473.16   BIC=482.19
 # signficant it means that a break in the slope occurred (we sum the value of the coefficient of d_{t} to the value of 
 # coefficient y_{t-1}).
 
-# Prima testo um break nell'intercetta
-
+# First we test a break in the intercept. 
 dummy = rep(1,150)
 dummy[1:100]=0
+breakIntercept = Arima(yBreakTs, order = c(1,0,0), xreg=dummy)
+coeftest(breakIntercept)
 
-breakint = Arima(ybreakts, order = c(1,0,0),  xreg=dummy)
-breakint
-coeftest(breakint)
+# Now we test a break in the intercept and in the slope, that is, in the AR coefficient of the first lag.
+dummyLag = lag(yBreakTs)*dummy
+B = matrix(c(dummy, dummyLag), nrow=length(dummy), ncol=2) 
+breakInterceptSlope = Arima(yBreakTs, order = c(1,0,0),  xreg=B)
+coeftest(breakInterceptSlope)
 
-# Si testa un break nell'intercetta e nell'AR coefficient
-# del lag primo
+# Coefficients in both tests seems significant, then a break occurred.
 
-nuova = lag(ybreakts)*dummy
-B = matrix( c(dummy, nuova), nrow=length(dummy), ncol=2) 
+# We estimate the series as an AR(2) process and we confront the performance with respect to the AR(1).
+arTwo = Arima(yBreakTs, order = c(2,0,0), fixed = c(NA,NA,NA))
+arTwo  # AIC=469.27, AICc=469.54, BIC=481.31
 
-breakintslo = Arima(ybreakts, order = c(1,0,0),  xreg=B)
-breakintslo
-coeftest(breakintslo)
+# Both AIC and BIC are lower for the AR(2).
 
-# I coefficienti in entrambi i test sembrano
-# significativi. Dunque c'è stato un break
-
-# Estimate the series as an AR(2) process. In what sense does the AR(2) model perform
-# better than the AR(1) model estimated in part a?
-
-AR2 = Arima(ybreakts, order = c(2,0,0), fixed = c(NA,NA,NA))
-AR2  # AIC=469.27   AICc=469.54   BIC=481.31
-
-# L'AIC e il BIC sono inferiori per L'AR(2)
-
-# Si plotta il valore del coefficiente ar1 stimando il modello
-# come un AR ricorsivamente partendo da 1. Si vede che vi è un
-# break 
-
-coefficiente <- 0
+# We plot the value of the AR coefficient of the first lag, ar_{1}, that we obtain estimating an AR model recursively 
+# starting from 1. We see that a break occurred. 
+coefficientFirstLag <- 0
 for (i in 1:149) {
-  mod <- arima(window(ybreakts, end=i+1),order=c(1,0,0),fixed=c(NA,NA))
-  coefficiente[i] <-  mod$coef
+  model <- arima(window(yBreakTs, end=i+1),order=c(1,0,0),fixed=c(NA,NA))
+  coefficientFirstLag[i] <-  model$coef
 }
-plot(coefficiente, type="l")
+plot(coefficientFirstLag, type="l")
 
-
-# Si plotta il CUSUM di un AR(2)
-# per vedere se è adeguato
-
+# We plot the CUSUM (Cumulative Sum) of an AR(2) to check if it is suitable.
 error <- 0
 for (i in 10:149) {
-  mod <- arima(window(ybreakts, end=i),order=c(2,0,0),fixed=c(NA,NA,NA))
-  pre <- predict(mod,n.ahead=1)
-  error[i] <- ybreakts[i+1] - pre$pred 
+  model <- arima(window(yBreakTs, end=i),order=c(2,0,0),fixed=c(NA,NA,NA))
+  prediction <- predict(model, n.ahead=1)
+  error[i] <- yBreakTs[i+1] - prediction$pred 
 }
-
-sder = sd(error, na.rm = TRUE)
-
-errornoNA = error[10:149]
-
-sommacumu = cumsum(errornoNA)
-
-CUSUM = sommacumu/sder 
-
+standardDeviationError = sd(error, na.rm = TRUE)
+errorNoNA = error[10:149]
+cumulativeSum = cumsum(errorNoNA)
+CUSUM = cumulativeSum/standardDeviationError 
 plot(CUSUM, type ="l")
 abline(h= 0, col="red")
 
-# Sembra che anche un AR(2) non sia idoneo
-  
-  
-  
-  
+# It seems that an AR(2) is not suitable. 
