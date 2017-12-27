@@ -1,2 +1,2 @@
 # time-series-enders-R
-Excercices from Applied Econometric Times Series by Enders solved in R
+Excercices from Enders (2015) *Applied Econometric Times Series* 4th edition solved in R
