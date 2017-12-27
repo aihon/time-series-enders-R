@@ -1,28 +1,23 @@
-###############################
-#
-#
-#     Esercizo 13 
-#
-#
-###############################
+##########################
+#                        #  
+#     Excercise 13       #  
+#                        #  
+##########################
 
-# Si pulisce il workspace
-
-rm(list = ls(all=TRUE))
-
-# Librerie
-
+# Load libraries
+library(haven)
 library(forecast)
 
-# Si importano i dati
+# Import the dataset and visualize it.
+dataset <- read_sas("/your_path/quarterly.sas7bdat")
+View(dataset)
 
-Dati <- read_sas("/home/giovanni/Scrivania/SASDatasets/quarterly.sas7bdat")
-View(Dati)
-indprod <- Dati[,15] 
-View(indprod)
+# We take the data we need.
+indProd <- dataset[,15] 
+View(indProd)
 
-# Si costruisce the growth rate of the series as 
-# y_t = log(indprod_t ) − log(indprod_t−1 )
+# We generate the growth rate of the series as:
+#                                 indProd_{t} = log(indProd_{t}) − log(indprod_{t−1})
 
 indprod <- ts(indprod)
 plot(indprod)
