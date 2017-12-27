@@ -47,7 +47,6 @@ adf.test(diffGDP, alternative = c("stationary")) # t = -2.353 hence I refuse the
                                                  # signifiancy
 
 # Point (d) 
-
 ur.ers(dataset$RGDP, type = c("DF-GLS"))   # t-statistic = 2.6471
 ur.ers(dataset$Potent, type = c("DF-GLS")) # t-statistic = 0.3197
 
