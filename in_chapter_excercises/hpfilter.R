@@ -50,5 +50,6 @@ gSeries = ggplot(melt(seriesTrend,"date"),aes(x=date,y=value,color=variable)) + 
           ggtitle('Hodrick-Prescot Filter for HPUSA') + 
           theme(legend.title = element_blank(),legend.justification = c(0.1, 0.8), legend.position = c(0, 1),
           legend.direction = "horizontal",legend.background = element_rect(fill="transparent",size=.5, linetype="dotted"))
-gCycle =  ggplot(cycleSeries,aes(x=date,y=cycle)) + geom_line(color="#619CFF") + ggtitle("Cyclical component (deviations from trend)")
+gCycle =  ggplot(cycleSeries,aes(x=date,y=cycle)) + geom_line(color="#619CFF") 
+          + ggtitle("Cyclical component (deviations from trend)")
 gComb = grid.arrange(gSeries,gCycle,nrow=2)
