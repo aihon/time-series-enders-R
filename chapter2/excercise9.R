@@ -6,78 +6,55 @@
 
 # Load libraries
 library(haven)
+library(forecast)
 
-# Import data
-dataset <- read_sas("/ypurpath/sim_2.sas7bdat")
-View(Dati.enders)
+# Import the dataset and visualize it
+dataset <- read_sas("/your_path/sim_2.sas7bdat")
+View(dataset)
 
-# Si estrae la serie Y2. Il processo sembra stazionario
+# Extract the series Y2. The process seems stationary
+Y2 = dataset$Y2
+time = dataset$OBS
+plot(time, Y2, type = "l")
 
-Y2 = Dati.enders$Y2
-time = Dati.enders$OBS
-plot(time,Y2, type = "l")
-
-# Si disegnano l'ACF e la PACF
-
+# Plot the ACF and the PACF. It seems an AR(2) process. The ACF go to 0 oscillating. The PACF have only the first two spike
+# significantly different from 0.
 acf(Y2)
 pacf(Y2)
 
-# Sembra un AR(2). La ACF va a zero alternando 
-# valori positivi e negativi. La PACF ha solo 
-# i primi due spike significativi
-# Si stima quindi un AR(2)
+# Estimate an AR(2)
+arTwo <- Arima(Y2, order = c(2,0,0), include.mean = FALSE)
 
-library(forecast)
-AR_due <- Arima(Y2, order = c(2,0,0), include.mean = FALSE)
+# Check the ACF of the residuals.
+# (In alternative we can plot the standardized residuals against time and look if they stay into the +2,-2 band of cofidence).
+residualsArTwo = residuals(ArTwo)
+acf(residualsArTwo)
 
-# Si controlla la ACF dei residui
-# In alternativa usa i residui standardizzati, e plotta il grafico
-# contro il tempo e vedi se stanno nell banda +2,-2 
+# We do a residual analysis using the Ljung-Box test: this method test the null hypothesis of independence of the residuals,
+# that is, if residuals are white noise. If the p-value is "big" we "accept" the null otherwise we reject the null.
+Box.test(residualsArTwo, lag = 8, type = "Ljung")
+Box.test(residualsArTwo, lag = 24, type = "Ljung")
 
-residui_AR_due = residuals(AR_due)
-acf(residui_AR_due)
+# We try to fit other two models: an AR(1) and an ARMA(1,1)
+armaOneOne = Arima(Y2, order = c(1,0,1), include.mean = FALSE)
+arOne = Arima(Y2, order = c(1,0,0), include.mean = FALSE)
 
-# Si fa un'analisi dei residui col 
-# Ljung-Box test: questo test testa la nulla
-# di indipendenza dei residui, ovvero se
-# sono o no white noise. Se il p-value è
-# grande si accetto la nulla, se il p-value
-# è piccolo rifiuto la nulla
+# We look at residuals
+residualsArmaOneOne = residuals(armaOneOne)
+acf(residualsArmaOneOne)
+residualsArOne = residuals(arOne)
+acf(residualsArOne)
 
-Box.test(residui_AR_due, lag = 8, type = "Ljung")
-Box.test(residui_AR_due, lag = 24, type = "Ljung")
+# We do the Ljung-Box test. The p-value of the two test for the AR(1) are such that we cannot accept the null of indepence. 
+# Then we conclude that the AR(1) it's note te correct model for our DGP.
+Box.test(residualsArOne, lag = 8, type = "Ljung")
+Box.test(residualsArOne, lag = 24, type = "Ljung")
+Box.test(residualsArmaOneOne, lag = 8, type = "Ljung")
+Box.test(residualsArmaOneOne, lag = 24, type = "Ljung")
 
-# Si provano altri due modelli
-# un AR(1) e un ARMA(1,1)
-
-ARMA_unouno =Arima(Y2, order = c(1,0,1), include.mean = FALSE)
-AR_uno = Arima(Y2, order = c(1,0,0), include.mean = FALSE)
-
-# Si guardano i residui
-
-residui_ARMA_unouno = residuals(ARMA_unouno)
-acf(residui_ARMA_unouno)
-
-residui_AR_uno = residuals(AR_uno)
-acf(residui_AR_uno)
-
-# Test di Ljung-Box.
-# Come si vede il p-value dei test
-# per l'AR(1) non fanno accettare la nulla
-# di indipendeza. Quindi l'AR(1) non è il
-# modello corretto per il nostro DGP
-
-Box.test(residui_AR_uno, lag = 8, type = "Ljung")
-Box.test(residui_AR_uno, lag = 24, type = "Ljung")
-
-
-Box.test(residui_ARMA_unouno, lag = 8, type = "Ljung")
-Box.test(residui_ARMA_unouno, lag = 24, type = "Ljung")
-
-# Si sceglie tra l'AR(2) e l'ARIMA(1,1)
-# guardando l'AIC
-
-AR_due # AIC=323 BIC=330
-ARMA_unouno # AIC=312 BIC=320
+# We choose between AR(2) and ARMIMA(1,1) by looking at the AIC. 
+# We select the ARIMA(1,1)
+arTwo       # AIC=323 BIC=330
+armaOneOne  # AIC=312 BIC=320
 
 
