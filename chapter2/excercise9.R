@@ -1,17 +1,14 @@
 #################################
-#      Stima ARMA(1,1) con      #
-#     dati da sim_2.sas7bdat    #
+#                               #
+#         Excercise 9           #
 #                               #
 #################################
 
-# Clean
-
-rm(list = ls(all=TRUE))
-
-# Si importano i dati
-
+# Load libraries
 library(haven)
-Dati.enders <- read_sas("/home/giovanni/Scrivania/SASDatasets/sim_2.sas7bdat")
+
+# Import data
+dataset <- read_sas("/ypurpath/sim_2.sas7bdat")
 View(Dati.enders)
 
 # Si estrae la serie Y2. Il processo sembra stazionario
