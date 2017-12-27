@@ -1,16 +1,10 @@
 #################################
-#
-# Esercizio Terrorismo pag. 310
-#
+#                               #
+# Excercise terrorism pag. 310  #
+#                               #
 #################################
 
-
-# Clean workspace
-
-rm(list = ls(all=TRUE))
-
-# Pacchetti
-
+# Load libraries
 library(forecast)
 library(FinTS)
 library(haven)
@@ -34,89 +28,60 @@ library(tsDyn)
 library(dse)
 
 
-# Dati
+# Import the dataset and organize it
+dataset <- read.xls("/your_path/Terrorism.38140308.XLS")
+newDataset <- Dati[37:164,]
+View(newDataset)
+plot(newDataset$Domestic, type = "l")
+plot(newDataset$Transnational, type = "l")
 
-Dati <- read.xls("/home/giovanni/Scrivania/SASDatasets/Terrorism.38140308.XLS")
-View(Dati)
+# Since we want to test Granger causality both of "domestic" on "transnational" and "transnational" on "domestic" we want first
+# see if the two series are stationary. In order to do that we perform a DF (Dickey-Fuller) test and a ERS (from Elliott, 
+# Rothenberg, and Stock [1996]) test generally known as Dickey–Fuller generalized least squares (DF-GLS) test.
+# First we have to select the lag lenght of the model and to do that we can use the general-to-specific method or the
+# function AIC() and BIC() applied at the models estimated with different lag lenght and choose the model that have the smaller
+# value of taht functions.
 
-Datinew <- Dati[37:164,]
-View(Datinew)
+# DF and DF-GLS for Domestic
+dfDom = ur.df(newDataset$Domestic, type = c("drift"),  lags = 2)            # -2.5144
+summary(dfDom) # "accept"
+ersDom = ur.ers(newDataset$Domestic, type = c("DF-GLS"), lag.max = 2)       # -2.4703 
+summary(ersDom) # reject
 
-plot(Datinew$Domestic, type = "l")
-plot(Datinew$Transnational, type = "l")
+# DF and DF-GLS on Trans
+dfTrans = ur.df(newDataset$Transnational, type = c("drift"), lags = 1)       # -2.6867
+summary(dfTrans) # reject
+ersTrans = ur.ers(newDataset$Transnational, type = c("DF-GLS"), lag.max = 1) # -2.5164 
+summary(ersTrans) # reject
 
-# Siccome vogliamo testare la Granger causality sia di dom
-# su trans che di trans su dom, vogliamo prima vedere se 
-# le due serie sono stazionarie. Per farlo facciamo un test
-# di DF e un test di DF-GLS (ERS).
-# Si deve prima selezionare il lag length nel modello,
-# per farlo si può usare il general-to-specific method,
-# oppure usare le funzioni AIC() e BIC() apploicate al
-# modello coi vari lag e scegliere il modello con i valori
-# più piccoli
-
-# RIcontrollare i valori e capire come fare per selzeionare lag
-
-
-# DF e DF-GLS su dom
-df1 = ur.df(Datinew$Domestic, type = c("drift"),  lags = 2)          # -2.5144
-summary(df1) # non rifiuto
-ers1 = ur.ers(Datinew$Domestic, type = c("DF-GLS"), lag.max = 2)      # -2.4703 
-summary(ers1) # rifiuto
-
-# DF e DF-GLS su trans
-df2 = ur.df(Datinew$Transnational, type = c("drift"), lags = 1)      # -2.6867
-summary(df2) # rifuiuto
-ers2 = ur.ers(Datinew$Transnational, type = c("DF-GLS"), lag.max = 1) # -2.5164 
-summary(ers2) # rifiuto
-
-
-# Ora si vuole testare la granger causality in entrambi i versi
-# SI deve selezionare il lag length del VAR
-# Per testare restrizioni sui coefficienti usare la funzione restrict()
-
-Datinew[,1] <- NULL
-View(Datinew)
-
-dom = Datinew$Domestic
-tra = Datinew$Transnational
-
-VARselect(Datinew) # AIC seleziona 3 lags
-
-var = VAR(Datinew, p = 3)
+# Now we want to test the Granger causality in both directions.
+# To do that we have to select the lag lenght of the VAR.
+# (To test restriction on coefficients use the function restrict())
+nnewDataset[,1] <- NULL
+View(nnewDataset)
+dom = nnewDataset$Domestic
+tran = nnewDataset$Transnational
+VARselect(nnewDataset) # AIC select 3 lags
+var = VAR(nnewDataset, p = 3)
 var
 
-# causality.
-# Voglio testare se dom GC o no tra.
-# Voglio cioè vedere se A_21 = 0 o meno
+# We want to test if "dom" Granger cause "tran", that is, if if A_{21} = 0
 causality(var, cause = "Domestic")$Granger       # F = 3.9797
-                                                 # p = 0.008597 < 0.05 rifiuto 
+                                                 # p = 0.008597 < 0.05 reject the null hence "dom" Granger cause "tran" 
                                                  # la nulla e quindi dom GC tra
 
-# Voglio testare se transnational Granger cause
-# Domestic, ovvero se A_12 = 0 o meno
+# We want to test if "tran" Granger cause "com", that is, if if A_{12} = 0
 causality(var, cause = "Transnational")$Granger  # F = 1.9627
-                                                 # p = 0.1203 > 0.05 accetto la nulla
-                                                 # che tra non GC dom
-
-
-
-
-summary(var)
-plot(var)
+                                                 # p = 0.1203 > 0.05 accept the null hence "tran" don't Granger cause "dom"
+                                                
 
 # Variance decomposition
-
 graphics.off()
 par(mar = rep(2, 4))
-
 d12 = fevd(var, n.ahead = 12)
 plot(d12)
 d12
 
 # Impulse response functions
-
-irf1 = irf(var, n.ahead = 20)
-plot(irf1)
-
-
+irfOne = irf(var, n.ahead = 20)
+plot(irfOne)
