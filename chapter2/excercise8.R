@@ -65,35 +65,28 @@ Box.test(resid(ARwoi),type="Ljung",lag=24)
 # The estimated value of beta_{12} lie inside the acceptation region, then we accept the null hypothesis that it's equal to 0.
 # (The t-statistics is: t_{\hat{\beta_{12}} = \frac{\hat{beta_{12}} - 0}{s.e.(\hat{beta_{12}}}. The estimated value lie inside
 # the interval [-t_{\hat{\beta_{12}};+t_{\hat{\beta_{12}}.]
-ARMA = arima(x , order=c(1,0,12), fixed=c(NA,0,0,0,0,0,0,0,0,0,0,0,0,NA))
+ARMA = arima(Y1,order=c(1,0,12),fixed=c(NA,0,0,0,0,0,0,0,0,0,0,0,0,NA))
 
-# Si vede che l'AIC del modello
-# AR(1) è inferiore a questo ARMA, quindi
-# si sceglie l'AR(1)
-
+# The AIC of the ARwoi is less than the AIC of the ARMA, then we select the AR(1)
 ARMA
 ARwoi
 
-# PUNTO c)
+# Solution of point (c)
+ARwoi_two = Arima(Y1,order=c(2,0,0),include.mean= FALSE)
+residualsARwoi_two = residuals(ARwoi_two)
+Box.test(resid(ARwoi_two),type="Ljung",lag=8)
+Box.test(resid(ARwoi_two),type="Ljung",lag=16)
+Box.test(resid(ARwoi_two),type="Ljung",lag=24)
 
-AR_due = Arima (x, order=c(2,0,0), include.mean= FALSE)
-resisui_ardue = residuals(AR_due)
-Box.test(resid(AR_due),type="Ljung",lag=8)
-Box.test(resid(AR_due),type="Ljung",lag=16)
-Box.test(resid(AR_due),type="Ljung",lag=24)
-
-# L'AIC dell'ARwoi è più piccolo
-# di quello dell' AR_due
-
+# The AIC of the ARwoi is less than the AIC of the ARwoi_two. The we select the ARwoi
 ARwoi
-AR_due
+ARwoi_two
 
-# PUNTO d)
-
-ARMA_unouno = Arima(x, order = c(1,0,1), include.mean = FALSE)
-residui_armaunouno = residuals(AR_due)
-acf(residui_armaunouno)
-pacf(residui_armaunouno)
+# Solution of point (d)
+ARMA_oneone = Arima(Y1,order = c(1,0,1),include.mean = FALSE)
+residualsARMA_oneone = residuals(ARMA_oneone)
+acf(residualsARMA_oneone)
+pacf(residualsARMA_oneone)
 
 
 
