@@ -49,7 +49,7 @@ ARi
 # The following test is an explanation of why we want residuals to be white noise:
 # "It means you managed to extract all the information there is to extract. What's left is just random and not representable
 # by a model. If there is correlation in the residuals this regularity can be further used to extract some more information."
-# (In alternative we can plot the standardized residuals and look if they stay into the +2,-2 band of cofidence.
+# (In alternative we can plot the standardized residuals against time and look if they stay into the +2,-2 band of cofidence).
 residualsARwoi <- residuals(ARwoi) 
 acf(Residui_woi) 
 
