@@ -80,14 +80,3 @@ maOneCpicoreDiffTwo # AIC=-2000.39   BIC=-1990.35
 
 # We estimate fit an AR(2) for cpicoreDiff 
 arTwoCpicoreDiff  = Arima(cpicorediff, order = c(2,0,0), fixed=c(NA,NA,NA))
-
-
-
-
-
-
-
-
-
-
-
