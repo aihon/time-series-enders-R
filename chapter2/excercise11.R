@@ -125,16 +125,3 @@ errorArimaTwoOneEsti = errorArimaTwoOneEst[160:211,]
 # We perform a Diebold-Mariano test to compare the AR(||1,3||) with the AR(5) and the ARIMA(2,1)
 dm.test(errorArFori, errorArFiveEsti, alternative=c("two.sided"), power=1) # pvalue < 0.05 quindi si rigetta la nulla
 dm.test(errorArFori, errorArimaTwoOneEsti, alternative=c("two.sided"), power=1) # pvalue < 0.05 quindi si rigetta la nulla
-
-
-
-
-
-
-
-
-
-
-
-
-
