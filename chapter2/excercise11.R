@@ -70,7 +70,7 @@ armaOneOne # AIC = -1125.39, BIC= -1112.06
 # AR(||1,3||) 
 for (i in 1:51) {
   model <- arima(window(logDiffPPI, end=159+i),order=c(3,0,0),fixed=c(NA,0,NA,NA), transform.pars = FALSE)
-  prediction <- predict(mod,n.ahead=1)
+  prediction <- predict(model,n.ahead=1)
   error[i] <- prediction$pre - logDiffPPI[159+i+1]
 }
 errorAr = error
@@ -78,7 +78,7 @@ errorAr = error
 # ARMA(1,1)
 for (i in 1:51) {
   model <- arima(logDiffPPI[5:211,], order = c(1,0,1), fixed=c(NA,NA,NA), transform.pars = FALSE)
-  prediction <- predict(mod,n.ahead=1)
+  prediction <- predict(model,n.ahead=1)
   error[i] <- prediction$pre - logDiffPPI[159+i+1]
 }
 errorArima = error
