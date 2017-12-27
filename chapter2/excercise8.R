@@ -32,9 +32,9 @@ acf(x = Y1,lag.max = 30)
 pacf(x = Y1,lag.max = 30)
 
 # Now we look if an AR(1) model fit the data well or not. We estimate an AR(1) without intercept: 
-#                                              y_(t) = a_(1) * y_(t-1) * e_(t)
+#                                              y_{t} = a_{1} * y_{t-1} * e_{t}
 # and one AR(1) with intercept:
-#                                              y_(t) = a_(0) * y_(t-1) * e_(t).
+#                                              y_{t} = a_{0} * y_{t-1} * e_{t}.
 # The s.e. of the intercept is big. Moreover, the AIC of the AR(1) without intercept is lower than the AIC of the AR(1) with
 # the intercept, then we "choose" the AR(1) without intercept.
 
@@ -53,24 +53,18 @@ ARi
 residualsARwoi <- residuals(ARwoi) 
 acf(Residui_woi) 
 
-# We use the Ljung-Box test to test if a certain number of lags are different from 0, that is, if there isn't correlation between 
-# lags.
+# We use the Ljung-Box test to test if a certain number of lags are different from 0, that is, if there isn't correlation 
+#between lags.
 Box.test(resid(ARwoi),type="Ljung",lag=8)
 Box.test(resid(ARwoi),type="Ljung",lag=16)
 Box.test(resid(ARwoi),type="Ljung",lag=24)
 
-
-# Nella PACF sembra esserci diretta
-# correlazione di x_t con il lag 12.
-# Si prova quindi ad usare un AR(1)
-# e a catturare questa correlazione con un coefficiente 
-# MA. y_t = a_1*y_(t-) + e_t + \beta_(12)e_(t-12)
-# Il valore stimato di \beta_(12) sta dentro
-# la regione diaccettazione, quindi si accetta la nulla
-# che è uguale a 0. Per calcolare il t-test
-# si fa il valore di beta stimato meno zero diviso lo standard error.
-# Il valore stimato sta dentro l'intervallo + o - la statistica t.
-
+# In the PACF it's seems that that the partial autocorrelation at lag 12 is significantly different from 0. We try to capture
+# such correlation introducing an MA coefficient in the AR(1):
+#                                           y_{t} = a_{1} * y_{t-1} + e_{t} + beta_{12} * e_{t-12}
+# The estimated value of beta_{12} lie inside the acceptation region, then we accept the null hypothesis that it's equal to 0.
+# (The t-statistics is: t_{\hat{\beta_{12}} = \frac{\hat{beta_{12}} - 0}{s.e.(\hat{beta_{12}}}. The estimated value lie inside
+# the interval [-t_{\hat{\beta_{12}};+t_{\hat{\beta_{12}}.]
 ARMA = arima(x , order=c(1,0,12), fixed=c(NA,0,0,0,0,0,0,0,0,0,0,0,0,NA))
 
 # Si vede che l'AIC del modello
