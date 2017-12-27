@@ -1,51 +1,37 @@
 #################################
-#      Stima AR(2) con          #
-#     dati da sim_2.sas7bdat    #
+#                               #
+#         Excercise 10          #
 #                               #
 #################################
 
-# Clean
-
-rm(list = ls(all=TRUE))
-
-# Si importano i dati
-
+# Load libraries
 library(haven)
-Dati.enders <- read_sas("/home/giovanni/Scrivania/SASDatasets/sim_2.sas7bdat")
-View(Dati.enders)
-
-# Si estrae la serie Y3. Il processo sembra stazionario
-
-Y = Dati.enders$Y3
-time = Dati.enders$OBS
-plot(time,Y, type = "l")
-
-# Si disegnano l'ACF e la PACF,
-# sembra un AR(2). Anche se c'è un
-# lag significativo nell' ACF a 16
-# e nella PACF ci sono i lag signfificativi
-# 14 e 17
-
-acf = acf(Y)
-pacf = pacf(Y)
-
-# Si stima quindi un AR(2)
-
 library(forecast)
-AR_due <- Arima(Y, order = c(2,0,0), include.mean = FALSE)
-AR_due
 
-# Si controlla la ACF dei residui
-# Sembra non essere rumore bianco.
-# C'è una correlazione diversa da zero al lag 16 
-# nella ACF. Nella PACF sono significativamente
-# diversi da zero gli spike ai lag: 6, 13, 16
-# In alternativa usa i residui standardizzati, e plotta il grafico
-# contro il tempo e vedi se stanno nell banda +2,-2 
+# Import the dataset and visualize it
+dataset <- read_sas("/your_path/sim_2.sas7bdat")
+View(dataset)
 
-residui_AR_due = residuals(AR_due)
-acfresiduiar= acf(residui_AR_due)
-pacfresiduiar= pacf(residui_AR_due)
+# Extract the series Y3. The process seems stationary
+Y3 = Dati.enders$Y3
+time = Dati.enders$OBS
+plot(time, Y3, type = "l")
+
+# We plot the ACF and the PACF and Y3 seems a stationary process.
+# Anyway we note a significantly lag at 16 in the ACF and in the PACF there are significantly lag at 14 and 17.  
+acf = acf(Y3)
+pacf = pacf(Y3)
+
+# We estimate an AR(2)
+arTwo <- Arima(Y3, order = c(2,0,0), include.mean = FALSE)
+arTwo
+
+# We check the ACF of residuals. They doesn't seems to be white noise, in fact there is a correlation different from 0 at 
+# lag 16 in the ACF and in the PACF are significantly different from 0 the spikes at lag 6, 13, 16.
+# (In alternative we can plot the standardized residuals against time and look if they stay into the +2,-2 band of cofidence).
+residualsArTwo = residuals(arTwo)
+acfResidualsArTwo = acf(residualsArTwo)
+pacfResidualsArTwo = pacf(residualsArTwo)
 
 
 # Si fa un'analisi dei residui col 
