@@ -34,65 +34,44 @@ acfResidualsArTwo = acf(residualsArTwo)
 pacfResidualsArTwo = pacf(residualsArTwo)
 
 
-# Si fa un'analisi dei residui col 
-# Ljung-Box test: questo test testa la nulla
-# di indipendenza dei residui, ovvero se
-# sono o no white noise. Se il p-value è
-# grande si accetto la nulla, se il p-value
-# è piccolo rifiuto la nulla. 
-# Viene fuori che c'è correlazione, non sono
-# white noise i residui
+# We do a residual analysis using the Ljung-Box test: this method test the null hypothesis of independence of the residuals,
+# that is, if residuals are white noise. If the p-value is "big" we "accept" the null otherwise we reject the null.
+# It's seems that there is correlation, then residuals are not white noise.
+Box.test(residualsArTwo, lag = 16, type = "Ljung")
 
-Box.test(residui_AR_due, lag = 16, type = "Ljung")
+# We try an ARMA(1,16), all coefficients seems significant.
+armaOneSixteen = Arima(Y3, order = c(2,0,16), fixed=c(NA,NA,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NA,0))
+armaOneSixteen
 
-# Si prova un ARMA(1,16), tutti i coefficienti
-# sembrano significativi. 
+# We test if there is correlation in the residulas of the ARMA(1,16).
+# It seems there isn't correlation.
+residualsArmaOneSixteen = residuals(armaOneSixteen)
+acfResidualsArmaOneSixteen = acf(residualsArmaOneSixteen)
+pacfResidualsArmaOneSixteen = pacf(residualsArmaOneSixteen)
 
-ARMAunosedici = Arima(Y, order = c(2,0,16), fixed=c(NA,NA,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,NA,0))
-ARMAunosedici
+# We compare the BIC and the AIC of the AR(2) and the ARMA(1,16). Both criteria are in favour of the ARMA(1,16), but 
+# from the excerices we know that the process is an AR(2).
+arTwo           # BIC=53.86, AIC=46.3
+armaOneSixteen  # BIC=50.53, AIC=40.11
 
-# Testiamo se c'è correlazione tra i residui.
-# Sembra che non ci sia autocorrelazione
+# One way to "prove" that we are wrong is to separate the sample in two parts.
+# A model have to fit well also a subsample if it fit well the sample. 
+Y50 <- Y3[50:100]
 
-residui_ARMA_unosedici = residuals(ARMAunosedici)
-acfresiduiarma= acf(residui_ARMA_unosedici)
-pacfresiduiarma= pacf(residui_ARMA_unosedici)
-
-# Confrontiamo BIC e AIC dell'AR e dell'ARMA.
-# I due criteri sono a favore dell'ARMA.
-# Dall'esercizio si sa però che il DGP è
-# un AR(2)
-
-
-AR_due # BIC=53.86, AIC=46.3
-ARMAunosedici # BIC=50.53, AIC=40.11
-
-# Un modo per provare che si è sbagliato
-# è dividere il sample in due. Anche in un subsample
-# deve valere lo stesso modello che vale nel sample
-
-Y50 <- Y[50:100]
-
-# ACF e PACF, ora è proprio un AR(2)
-
+# We look at the ACF and the PACF. It's clearly an AR(2) process.
 acf(Y50)
 pacf(Y50)
 
-# Si stima un AR(2)
+# We estimate an AR(2)
+arTwoFifty <- Arima(Y50, order = c(2,0,0), include.mean = FALSE)
+arTwoFifty
 
-AR_due50 <- Arima(Y50, order = c(2,0,0), include.mean = FALSE)
-AR_due50
-
-# Si analizzano i residui con il test di Ljung-Box
-# e non emerge autocorrelazione significativa tra i residui.
-# Dunque il modell che si sceglie è l'AR(2) perchè l'effetto del 
-# 16esimo coefficinte MA sarebbe dovuto essere presente anche in
-# questo subsample
-
-residui_AR_due50 = residuals(AR_due50)
-Box.test(residui_AR_due50, lag = 8, type = "Ljung")
-Box.test(residui_AR_due50, lag = 16, type = "Ljung")
-Box.test(residui_AR_due50, lag = 24, type = "Ljung")
+# We test the independence of residuals with a Ljung-Box test. Tere isn't autocorrelation between residuals.
+# We choose an AR(2) model because the effect of the sixteenth MA coefficient should have been present also in this subsample.
+residualsArTwoFifty = residuals(arTwoFifty)
+Box.test(residualsArTwoFifty, lag = 8, type = "Ljung")
+Box.test(residualsArTwoFifty, lag = 16, type = "Ljung")
+Box.test(residualsArTwoFifty, lag = 24, type = "Ljung")
 
 
 
